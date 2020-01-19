@@ -524,3 +524,55 @@ module.exports = {
 ```
 
 注意：使用`MiniCssExtractPlugin`提取css文件时，无法使用`style-loader`，他们的功能是互斥的，所以他们只能使用一个。
+
+## 代码压缩
+
+代码压缩主要是HTML、JS、CSS分别压缩。
+
+### js文件压缩
+
+在webpack4中，内置了`uglifyjs-webpack-plugin`了来压缩js。所以默认打包js文件就已压缩过了。
+
+### css文件压缩
+
+使用`optimize-css-assets-webpack-plugin`压缩css文件，同时使用`cssnano`css预处理器。  
+
+安装依赖：`npm i optimize-css-assets-webpack-plugin cssnano -D`
+
+``` js
+// webpack.prod.js
+module.exports = {
+  //...
+  plugins: [
+    new OptimizeCSSAssetsPlugin({
+      assetNameRegExp: /\.css$/g,
+      cssProcessor: require('cssnano')
+    })
+  ]
+}
+```
+
+### html文件压缩
+
+修改`html-webpack-plugin`，设置压缩参数
+
+安装依赖：`npm i html-webpack-plugi -D`
+
+``` js
+// webpack.prod.js
+module.exports = {
+  plugins: [
+    new HtmlWebpackPlugin({
+      // other options
+      minify: {
+        html5: true,
+        collapseWhitespace: true, // 是否折叠空白
+        preserveLineBreaks:false, // 是否保存换行
+        minifyCSS: true, // 是否压缩css
+        minifyJS: true, // 是否压缩js
+        removeComments: false // 是否移除注释
+      }
+    })
+  ]
+}
+```

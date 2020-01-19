@@ -2,6 +2,7 @@ const path = require('path')
 const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin')
 
 module.exports = {
   mode: 'production',
@@ -58,6 +59,38 @@ module.exports = {
   plugins: [
     new MiniCssExtractPlugin({
       filename: '[name]_[contenthash:8].css'
+    }),
+    new OptimizeCSSAssetsPlugin({
+      assetNameRegExp: /\.css$/g,
+      cssProcessor: require('cssnano')
+    }),
+    new HtmlWebpackPlugin({
+      template: path.join(__dirname, 'src/search.html'), // html模板
+      filename: 'search.html', // 生成html文件名。
+      chunks: ['search'], // 指定html需要使用哪些chunk。
+      inject: true, // 是否自动注入js、css等资源到html中。
+      minify: {
+        html5: true,
+        collapseWhitespace: true, // 是否折叠空白
+        preserveLineBreaks: false, // 是否保存换行
+        minifyCSS: true, // 是否压缩css
+        minifyJS: true, // 是否压缩js
+        removeComments: false // 是否移除注释
+      }
+    }),
+    new HtmlWebpackPlugin({
+      template: path.join(__dirname, 'src/index.html'), // html模板
+      filename: 'index.html', // 生成html文件名。
+      chunks: ['index'], // 指定html需要使用哪些chunk。
+      inject: true, // 是否自动注入js、css等资源到html中。
+      minify: {
+        html5: true,
+        collapseWhitespace: true, // 是否折叠空白
+        preserveLineBreaks: false, // 是否保存换行
+        minifyCSS: true, // 是否压缩css
+        minifyJS: true, // 是否压缩js
+        removeComments: false // 是否移除注释
+      }
     })
   ]
 }
