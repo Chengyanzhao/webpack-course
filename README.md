@@ -318,3 +318,153 @@ module.exports = {
 ```
 
 按此配置打包后，小于`limit`的图片不会在dist目录中出现，而是直接插入到js中。
+
+## 文件监听
+
+文件监听是在发现源代码变化时，自动重新构建。在webpack中开启监听模式有两种方式：
+
+- 在启动webpack命令时，带上`--watch`参数
+- 在webpack.config.js中设置`watch: true`
+
+webpack对于watch的默认配置：
+
+``` js
+module.exports = {
+  watch: false, // 是否开启文件监听，默认为false。
+  watchOptions: {
+    ignored: /node_modules/, // 忽略监听的文件夹，默认为空。
+    aggregateTimeout: 300, // 监听到变化发生后延迟300ms再执行，默认300，单位ms。某个文件发生变化，并不会立刻告诉监听者，而是缓存起来，等aggregateTimeout。
+    poll: 1000 // 判断文件是否发生变化是通过不停询问系统执行文件有没有变化实现的，默认每秒访问1000次，单位次/s。
+  }
+}
+```
+
+
+## 热更新
+
+webpack中的热更新有两种方式：
+
+1. `webpack-dev-server`
+2. `webpack-dev-middleware`
+
+### webpack-dev-server
+
+使用上一节中的watch时，每次自动构建后我们依然需要手动刷新浏览器，这很麻烦。使用webpack的热更新及插件即可解决这个问题。
+
+webpack热更新依赖于`webpack-dev-server`和`HotModuleReplacementPlugin`插件。WDS不输出文件，而是放在内容中，这样避免io可提升构建效率。`HotModuleReplacementPlugin`可解决自动刷新问题，尝尝用这套配置在开发环境中。
+
+安装：
+首先我们需要安装`webpack-dev-server`：`npm i webpack-dev-server -D`。对于`HotModuleReplacementPlugin`插件，它在webpack中内置，所不需要额外安装。
+
+另外我们需要在webpack.config.js中添加`devServer`配置开启热更新，另外添加`HotModuleReplacementPlugin`插件来实现自动构建后的页面自动刷新。
+
+``` js
+const webpack = require('webpack')
+
+module.exports = {
+  // ...
+  plugins:[
+    new webpack.HotModuleReplacementPlugin() // 自动刷新插件。
+  ],
+  devServer: {
+    contentBase: './dist', // webpack-dev-server 服务资源目录。可以将它看成express项目中的static目录public。
+    hot :true // 开启热更新。
+  }
+}
+```
+
+最后，需要在package.json中的`scripts`中添加命令：`webpack-dev-server --open`，`--open`参数会自动打开浏览器。  
+
+到此配置结束，可以在项目命令行中执行`npm run dev`来查看效果。脚本更改后，webpack会自动构建，dist目录没有构建结果，但页面会自动刷新。
+
+### webpack-dev-middleware
+
+WDM需要配合一个node server来使用，通常使用express或Koa。WDM将webpack输出的文件传输给服务器，适用于灵活的定制场景。
+
+``` js
+// webpack.config.js
+const path = require('path')
+const webpack = require('webpack')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+
+module.exports = {
+  mode: 'development',
+  entry: {
+    index: ['webpack-hot-middleware/client?noInfo=true&reload=true', './src/index.js'], // './src/index.js',
+    search: ['webpack-hot-middleware/client?noInfo=true&reload=true', './src/search.js'] // './src/search.js'
+  },
+  output: {
+    path: path.join(__dirname, 'dist'),
+    filename: '[name].js',
+    publicPath: '/'
+  },
+  module: {
+    rules: [
+      {
+        test: /.js$/,
+        use: 'babel-loader'
+      },
+      {
+        test: /.css$/,
+        use: ['style-loader', 'css-loader'] // 顺序是从右到左，先执行css-loader，然后将结果传递给style-loader。
+      },
+      {
+        test: /.less$/,
+        use: ['style-loader', 'css-loader', 'less-loader']
+      },
+      {
+        test: /.(png|svg|jpg|gif)$/,
+        use: [{
+          loader: 'url-loader',
+          options: {
+            limit: 102400 // 对于小于这个限制的资源才进行base64处理。单位：字节b。
+          }
+        }]
+      },
+      {
+        test: /.(woff|woff2|eot|ttf)$/,
+        use: 'file-loader'
+      }
+    ]
+  },
+  plugins: [
+    new webpack.HotModuleReplacementPlugin(), // 自动刷新插件。
+    new HtmlWebpackPlugin({
+      template: './dist/search.html',
+      title: 'Output Management',
+    }),
+  ],
+  devServer: {
+    contentBase: './dist', // webpack-dev-server 服务资源目录。可以将它看成express项目中的static目录public。
+    hot: true // 开启热更新。
+  }
+}
+
+```
+
+``` js
+// server.js
+const path = require('path')
+const express = require('express')
+const webpack = require('webpack')
+const webpackDevMiddleware = require('webpack-dev-middleware')
+const webpackHotMiddleware = require('webpack-hot-middleware') // 自动刷新中间件
+const config = require('./webpack.config.js')
+
+const complier = webpack(config)
+const app = express()
+
+app.use(webpackDevMiddleware(complier, {
+  publicPath: config.output.publicPath
+}))
+
+app.use(webpackHotMiddleware(complier, {
+  reload: true,
+}))
+
+app.listen(3000, function () {
+  console.log('example app listening on port 3000')
+})
+```
+
+此时启动文件设置成这个配置入口即可，可以在package.json的`scripts`中设置：`"server": "node server.js"`，然后再项目命令行输入`npm run server`启动。

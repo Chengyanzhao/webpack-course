@@ -1,7 +1,9 @@
 const path = require('path')
+const webpack = require('webpack')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 module.exports = {
-  mode: 'production',
+  mode: 'development',
   entry: {
     index: './src/index.js',
     search: './src/search.js'
@@ -9,6 +11,7 @@ module.exports = {
   output: {
     path: path.join(__dirname, 'dist'),
     filename: '[name].js',
+    publicPath: '/'
   },
   module: {
     rules: [
@@ -19,7 +22,7 @@ module.exports = {
       {
         test: /.css$/,
         use: ['style-loader', 'css-loader'] // 顺序是从右到左，先执行css-loader，然后将结果传递给style-loader。
-      }, r
+      },
       {
         test: /.less$/,
         use: ['style-loader', 'css-loader', 'less-loader']
@@ -38,5 +41,16 @@ module.exports = {
         use: 'file-loader'
       }
     ]
+  },
+  plugins: [
+    new webpack.HotModuleReplacementPlugin(), // 自动刷新插件。
+    new HtmlWebpackPlugin({
+      template: './dist/search.html',
+      title: 'Output Management',
+    }),
+  ],
+  devServer: {
+    contentBase: './dist', // webpack-dev-server 服务资源目录。可以将它看成express项目中的static目录public。
+    hot: true // 开启热更新。
   }
 }
