@@ -339,7 +339,6 @@ module.exports = {
 }
 ```
 
-
 ## 热更新
 
 webpack中的热更新有两种方式：
@@ -468,3 +467,60 @@ app.listen(3000, function () {
 ```
 
 此时启动文件设置成这个配置入口即可，可以在package.json的`scripts`中设置：`"server": "node server.js"`，然后再项目命令行输入`npm run server`启动。
+
+## 文件指纹
+
+webpack打包后文件一般都有一个字母加数字的后缀，这就是文件指纹。文件指纹用于对文件的版本管理。另外对于没有修改的文件可以不修改文件的指纹，继续使用缓存。
+
+常见的文件指纹种类：
+
+1. Hash：和整个项目的构建相关，只要项目中任何文件有修改，整个项目构建的hash值就会更改。
+2. Chunkhash：和webpack打包的chunk有关，不同的entry会生成不同的chunkhash值，适用于多页面配置。
+3. Contenthash：根据文件内容来定义hash，文件内容不变，则contenthash不变。适用于css配置。
+
+针对不同类型资源设置文件指纹：
+
+``` js
+// webpack.config.js
+module.exports = {
+  output: {
+    path: __dirname + '/dist',
+    filename: '[name][chunkhash:8].js' // 对于js,使用chunkhash，取前8位。
+  },
+  module: {
+    rules: [
+       {
+        test: /.css$/,
+        use: [
+          MiniCssExtractPlugin.loader,
+          'css-loader',
+        ]
+      },
+      {
+        test: /.less$/,
+        use: [
+          MiniCssExtractPlugin.loader,
+          'css-loader',
+          'less-loader',
+        ]
+      },
+      {
+        test: /.(png|svg|jpg|gif)$/,
+        use: [{
+          loader: 'file-loader', // 同样适用于url-loader
+          options: {
+            name: 'img/[name][hash:8].[ext]' // 对于图片，使用hash，取前8位。file-loader也支持contenthash。图片和字体的hash与前面的hash不同，这里也是指资源本身的hash，默认采用md5生成。
+          }
+        }]
+      }
+    ]
+  },
+  plugins: [
+    new MiniCssExtractPlugin({ // 使用MiniCssExtractPlugin插件把style-loader的css提取成独立的文件。
+      filename: '[name][contenthash:8].css' // 对于css，使用contenthash，取前8位。
+    })
+  ]
+}
+```
+
+注意：使用`MiniCssExtractPlugin`提取css文件时，无法使用`style-loader`，他们的功能是互斥的，所以他们只能使用一个。
