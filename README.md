@@ -275,3 +275,14 @@ render(){
 }
 
 ```
+
+**字体资源：**
+
+对字体资源的处理，和上面对图片的处理相同，只是loader中的test改成字体文件后缀。
+
+``` js
+{
+  test: /.(woff|woff2|eot|ttf)$/,
+  use: 'file-loader'
+}
+```
