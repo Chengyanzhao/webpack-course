@@ -245,6 +245,10 @@ module.exports = {
 
 ## 解析图片和字体资源
 
+对于图片的解析有两个loader可以使用：`file-loader`、`url-loader`。
+
+### file-loader
+
 `file-loader`用于处理一些文件，对于图片或字体资源，可以使用这个loader处理。
 
 安装：`npm i file-loader -D`
@@ -286,3 +290,31 @@ render(){
   use: 'file-loader'
 }
 ```
+
+### url-loader
+
+`url-loader`与`file-loader`都可以处理图片和字体，但`url-loader`还可以对较小的资源自动base64处理。`url-loader`内部也是使用了`file-loader`。
+
+安装：`npm i url-loader -D`
+
+配置：
+
+``` js
+module.exports = {
+  module: {
+    rules: [
+      {
+        test: /.(png|svg|jpg|gif)$/,
+        use: [{
+          loader: 'url-loader',
+          options:{
+            limit: 10240 // 单位：字节b。
+          }
+        }]
+      }
+    ]
+  }
+}
+```
+
+按此配置打包后，小于`limit`的图片不会在dist目录中出现，而是直接插入到js中。
