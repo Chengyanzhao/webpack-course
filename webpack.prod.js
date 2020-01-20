@@ -3,6 +3,7 @@ const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin')
+const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 
 module.exports = {
   mode: 'production',
@@ -91,6 +92,7 @@ module.exports = {
         minifyJS: true, // 是否压缩js
         removeComments: false // 是否移除注释
       }
-    })
+    }),
+    new CleanWebpackPlugin()
   ]
 }

@@ -1,6 +1,7 @@
 const path = require('path')
 const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 
 module.exports = {
   mode: 'development',
@@ -48,6 +49,7 @@ module.exports = {
       template: './dist/search.html',
       title: 'Output Management',
     }),
+    new CleanWebpackPlugin()
   ],
   devServer: {
     contentBase: './dist', // webpack-dev-server 服务资源目录。可以将它看成express项目中的static目录public。
