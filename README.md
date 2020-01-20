@@ -93,7 +93,7 @@ module.exports = {
 | ------------- | ------------------------------------------ |
 | babel-loader  | 转换ES6+新特性语法                         |
 | css-loader    | 支持.css文件的加载和解析。(import xxx.css) |
-| style-loader  | xzz                                        |
+| style-loader  | 将css插入head中                            |
 | less-loader   | 将less文件转换成css                        |
 | ts-loader     | 将ts转换成js                               |
 | file-loader   | 图片、字体等文件的打包                     |
