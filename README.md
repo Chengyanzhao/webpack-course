@@ -117,3 +117,60 @@ module.exports = {
 ```
 
 设置根元素`font-size`：找到`lib-flexible`库，手动将代码放在html的head中。
+
+## 静态资源内联
+
+### HTML和JS内联
+
+可以使用`raw-loader`处理html和js的内联。(注意使用0.5.1版本)
+
+安装：`npm i raw-loader@0.5.1 -D`
+
+准备：`meta.html`放一些meta标签。目的是将这些meta标签插入到index.html的head中。
+
+``` html
+<!-- meta.html -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="renderer" content="webkit">
+<meta name="force-rendering" content="webkit">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta name="google-site-verification" content="FTeR0c8arOPKh8c5DYh_9uu98_zJbaWw53J-Sch9MTg">
+<meta name="description" property="og:description" content="有问题，上知乎。知乎，可信赖的问答社区，以让每个人高效获得可信赖的解答为使命。">
+```
+
+在index.html中引入：
+
+``` html
+<head>
+  <!-- 引入meta中的标签 -->
+  ${ require('raw-loader!./meta.html') }
+  <title>index</title>
+  <!-- 引入js脚本 -->
+  <script>${ require('raw-loader!babel-loader!../../node_modules.lib-flexible/flexible.js') }</script>
+</head>
+```
+
+### CSS内联
+
+方案1：借助`style-loader`，在上一章节中使用过。
+方案2：`html-inline-css-webpack-plugin`，针对打包好的css chunk，内联到html head内style标签中。
+
+来看一下方案2的使用：
+
+安装：`npm i html-inline-css-webpack-plugin -D`
+
+配置：
+
+``` js
+// webpack.config.js
+const HTMLInlineCSSWebpackPlugin = require('html-inline-css-webpack-plugin').default
+
+module.exports = {
+  plugins: [
+    new MiniCssExtractPlugin(),
+    new HtmlWebpackPlugin(),
+    new HTMLInlineCSSWebpackPlugin()
+  ],
+}
+```

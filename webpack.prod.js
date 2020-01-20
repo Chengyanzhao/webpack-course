@@ -2,6 +2,7 @@ const path = require('path')
 const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const HTMLInlineCSSWebpackPlugin = require('html-inline-css-webpack-plugin').default
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin')
 const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 
@@ -101,6 +102,7 @@ module.exports = {
         removeComments: false // 是否移除注释
       }
     }),
-    new CleanWebpackPlugin()
+    new CleanWebpackPlugin(),
+    new HTMLInlineCSSWebpackPlugin()
   ]
 }
