@@ -174,3 +174,29 @@ module.exports = {
   ],
 }
 ```
+
+## 多页面应用打包通用方案
+
+在之前的章节中，我们针对两个页面`index.html`和`search.html`配置了两个`WebpackHtmlPlugin`来打包两个页面。这样做缺点很明显，每次新增、删除页面都要手动添加、删除`WebpackHtmlPlugin`插件。
+
+动态获取entry，并根据entry的数量动态配置`WebpackHtmlPlugin`即可解决这个问题。如果想要动态获取entry，还需要对我们的多页面文件目录结构进行设置：
+
+``` js
+// entry
+entry: {
+  app: './src/app/index.js',
+  search: './src/search/index.js'
+}
+```
+
+通过这样的结构，我们可以用`glob`库去匹配多页面的入口形成entry对象，再通过这个对象生成多个`WebpackHtmlPlugin`即可。  
+
+下面来看看如何操作：
+
+安装`glob`：`npm i glob -D`
+
+配置：
+
+``` js
+
+```
