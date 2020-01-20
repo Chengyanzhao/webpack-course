@@ -79,3 +79,41 @@ module.exports = {
   ]
 }
 ```
+
+## 移动端CSS px自动转rem
+
+使用`px2rem-loader`，可以将代码中的px自动转换为rem单位。  
+安装：`npm i px2rem-loader -D`。
+
+针对根元素的`font-size`单位，我们可以使用手淘的`lib-flexible`库，在页面打开时去设置。  
+安装：由于是在项目代码中使用，所以要将他设置为dependencies，`npm i lib-flexible -S`。
+
+配置：
+
+``` js
+// webpack.config.js
+module.exports = {
+  module: {
+    rules: [
+      {
+        test: /.less$/,
+        use: [
+          MiniCssExtractPlugin.loader,
+          'css-loader',
+          'less-loader',
+          'postcss-loader',
+          {
+            loader: 'px2rem-loader',
+            options: {
+              remUnit: 75, // rem相对于px的转换单位，75代表1rem=75px，适用于750设计稿。
+              remPrecesion: 8 // px转rem小数点位数。
+            }
+          }
+        ]
+      },
+    ]
+  }
+}
+```
+
+设置根元素`font-size`：找到`lib-flexible`库，手动将代码放在html的head中。

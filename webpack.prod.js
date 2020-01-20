@@ -36,6 +36,13 @@ module.exports = {
           'css-loader',
           'less-loader',
           'postcss-loader',
+          {
+            loader: 'px2rem-loader',
+            options: {
+              remUnit: 75, // rem相对于px的转换单位，75代表1rem=75px，适用于750设计稿。
+              remPrecesion: 8 // px转rem小数点位数。
+            }
+          }
         ]
       },
       {
