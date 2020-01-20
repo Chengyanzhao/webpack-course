@@ -198,5 +198,48 @@ entry: {
 配置：
 
 ``` js
+// webpack.config.js
+const setMPA = () => {
+  const entry = {}
+  const htmlWebpackPlugins = []
 
+  const entryFiles = glob.sync(path.join(__dirname, './src/*/index.js'))
+
+  Object.keys(entryFiles).map(index => {
+    const entryFile = entryFiles[index]
+    const match = entryFile.match(/src\/(.*)\/index\.js/);
+    const pageName = match && match[1]
+    entry[pageName] = entryFile
+
+    htmlWebpackPlugins.push(
+      new HtmlWebpackPlugin({
+        template: path.join(__dirname, `src/${pageName}/index.html`),
+        filename: `${pageName}.html`, // 生成html文件名。
+        chunks: pageName, // 指定html需要使用哪些chunk。
+        inject: true, // 是否自动注入js、css等资源到html中。
+        minify: {
+          html5: true,
+          collapseWhitespace: true, // 是否折叠空白
+          preserveLineBreaks: false, // 是否保存换行
+          minifyCSS: true, // 是否压缩css
+          minifyJS: true, // 是否压缩js
+          removeComments: false // 是否移除注释
+        }
+      }),
+    )
+  })
+
+  return { entry, htmlWebpackPlugins }
+}
+
+const { entry, htmlWebpackPlugins } = setMPA()
+
+module.exports = {
+  entry: entry,
+  // ...
+  plugins:[
+    //...
+    ...htmlWebpackPlugins
+  ]
+}
 ```
