@@ -26,7 +26,21 @@ module.exports = {
       },
       {
         test: /.less$/,
-        use: ['style-loader', 'css-loader', 'less-loader']
+        use: [
+          MiniCssExtractPlugin.loader,
+          'css-loader',
+          'less-loader',
+          {
+            loader: 'postcss-loader',
+            options: {
+              plugins: () => {
+                require('autoprefixer')({
+                  browsers: ['last 2 version', '>1%', 'ios 7']
+                })
+              }
+            }
+          }
+        ]
       },
       {
         test: /.(png|svg|jpg|gif)$/,
