@@ -19,21 +19,23 @@ const setMPA = () => {
     const pageName = match && match[1]
     entry[pageName] = entryFile
 
+    const opts = {
+      template: path.join(__dirname, `src/${pageName}/index.html`),
+      filename: `${pageName}.html`, // 生成html文件名。
+      chunks: [pageName], // 指定html需要使用哪些chunk。
+      inject: true, // 是否自动注入js、css等资源到html中。
+      minify: {
+        html5: true,
+        collapseWhitespace: true, // 是否折叠空白
+        preserveLineBreaks: false, // 是否保存换行
+        minifyCSS: true, // 是否压缩css
+        minifyJS: true, // 是否压缩js
+        removeComments: false // 是否移除注释
+      }
+    }
+    console.log(opts)
     htmlWebpackPlugins.push(
-      new HtmlWebpackPlugin({
-        template: path.join(__dirname, `src/${pageName}/index.html`),
-        filename: `${pageName}.html`, // 生成html文件名。
-        chunks: pageName, // 指定html需要使用哪些chunk。
-        inject: true, // 是否自动注入js、css等资源到html中。
-        minify: {
-          html5: true,
-          collapseWhitespace: true, // 是否折叠空白
-          preserveLineBreaks: false, // 是否保存换行
-          minifyCSS: true, // 是否压缩css
-          minifyJS: true, // 是否压缩js
-          removeComments: false // 是否移除注释
-        }
-      }),
+      new HtmlWebpackPlugin(opts),
     )
   })
 
@@ -43,7 +45,9 @@ const setMPA = () => {
 const { entry, htmlWebpackPlugins } = setMPA()
 
 module.exports = {
-  mode: 'production',
+  // mode: 'production',
+  mode: 'none',
+  devtool: 'inline-source-map',
   entry,
   output: {
     path: path.join(__dirname, 'dist'),

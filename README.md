@@ -215,7 +215,7 @@ const setMPA = () => {
       new HtmlWebpackPlugin({
         template: path.join(__dirname, `src/${pageName}/index.html`),
         filename: `${pageName}.html`, // 生成html文件名。
-        chunks: pageName, // 指定html需要使用哪些chunk。
+        chunks: [pageName], // 指定html需要使用哪些chunk，注意是数组。
         inject: true, // 是否自动注入js、css等资源到html中。
         minify: {
           html5: true,
@@ -243,3 +243,31 @@ module.exports = {
   ]
 }
 ```
+
+## 使用source map
+
+source map 是一个信息文件，存储这位置信息，用于调式代码时，直接显示源代码的位置，而不是显示打包后的代码，方便调试。
+
+webpack中的source map有以下5种关键字：
+
+- eval: 使用eval包裹模块代码。
+- source map: 产生.map文件。
+- cheap: 不包含列信息
+- inline: 将.map作为DataURL嵌入，不单独生成.map文件
+- module: 包含loader的source map
+
+source map类型，由上面几种关键字排列组合得到：
+
+| devtool                      | 首次构建 | 二次构建 | 是否适合生产环境 | 可以定位的代码                     |
+| ---------------------------- | -------- | -------- | ---------------- | ---------------------------------- |
+| (none)                       | +++      | +++      | yes              | 最终输出的代码                     |
+| eval                         | +++      | +++      | no               | webpack生成的代码(一个个的模块)    |
+| cheap-eval-source-map        | +        | ++       | no               | 经过loader转换后的代码(只能看到行) |
+| cheap-module-eval-source-map | o        | ++       | no               | 源代码(只能看到行)                 |
+| eval-source-map              | --       | +        | no               | 源代码                             |
+| cheap-source-map             | +        | o        | yes              | 经过loader转换后的代码(只能看到行) |
+| cheap-module-source-map      | o        | -        | yes              | 源代码(只能看到行)                 |
+| inline-cheap-source-map      | +        | o        | no               | 经过loader转换后的代码(只能看到行) |
+| source-map                   | --       | --       | yes              | 源代码                             |
+| inline-source-map            | --       | --       | no               | 源代码                             |
+| hidden-source-map            | --       | --       | yes              | 源代码                             |

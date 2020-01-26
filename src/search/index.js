@@ -2,12 +2,13 @@
 
 import React from 'react'
 import ReactDOM from 'react-dom'
-import './search.less'
-import logo from './images/logo.png'
+import './index.less'
+import logo from '../images/logo.png'
 
 class Search extends React.Component {
 
   render() {
+    debugger
     return <div className="search-text">
       Search Text<img src={logo} />
     </div>
