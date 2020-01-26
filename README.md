@@ -271,3 +271,66 @@ source map类型，由上面几种关键字排列组合得到：
 | source-map                   | --       | --       | yes              | 源代码                             |
 | inline-source-map            | --       | --       | no               | 源代码                             |
 | hidden-source-map            | --       | --       | yes              | 源代码                             |
+
+## 提取页面公共资源
+
+多个页面可能引用了一些相同的公共模块，打包时将他们分别打在每个页面是很浪费的，所以需要将他们提取出来作为公共资源。
+
+### 基础库分离
+
+思路：将vue、react、react-dom等基础包通过cdn引入，不打入bundle中。
+
+方法1：使用`html-webpack-externals-plugins`
+
+配置:
+
+``` js
+const HtmlWebpackExternalsPlugins = require('html-webpack-externals-plugins')
+// ...
+plugins: [
+  new HtmlWebpackExternalsPlugins({
+    externals: [
+      {
+        module: 'react',
+        entry: 'https://cdn.bootcss.com/react/16.10.2/cjs/react.production.min.js',
+        global: 'React'
+      },
+      {
+        module: 'react-dom',
+        entry: 'xxx',
+        global: 'ReactDOM'
+      }
+    ]
+  })
+]
+```
+
+方法2：利用`SplitChunksPlugin`进行公共脚本分离
+
+`SplitChunksPlugin`在webpack4中内置，替代`CommonsChunkPlugin`插件
+
+配置：
+
+``` js
+module.exports = {
+  optimization: {
+    splitChunks: {
+      cacheGroups: {
+        commons: {
+          test: /(react|react-dom)/, // 匹配规则，分离他们。
+          name: 'vendors', // 分离出的名称
+          chunks: 'all'
+        }
+      }
+    }
+  }
+}
+```
+
+chunks参数说明：
+
+- async: (默认)异步引入的库进行分离。比如es6中动态引入的库。
+- initial: 同步引入的库进行分离
+- all: 所有引入的库进行分离
+
+[查看更多](https://webpack.js.org/plugins/split-chunks-plugin/#root)
