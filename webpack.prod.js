@@ -23,7 +23,7 @@ const setMPA = () => {
       new HtmlWebpackPlugin({
         template: path.join(__dirname, `src/${pageName}/index.html`),
         filename: `${pageName}.html`, // 生成html文件名。
-        chunks: [pageName], // 指定html需要使用哪些chunk。
+        chunks: ['vendors', 'common', pageName], // 指定html需要使用哪些chunk。
         inject: true, // 是否自动注入js、css等资源到html中。
         minify: {
           html5: true,
@@ -111,15 +111,16 @@ module.exports = {
       cssProcessor: require('cssnano')
     }),
     new CleanWebpackPlugin(),
-    new HTMLInlineCSSWebpackPlugin()
+    new HTMLInlineCSSWebpackPlugin(),
   ],
   optimization: {
     splitChunks: {
       cacheGroups: {
         commons: {
-          test: /(react|react-dom)/,
-          name: 'vendors',
-          chunks: 'all'
+          name: 'common',
+          chunks: 'all',
+          minChunks: 2,
+          priority: 10,
         }
       }
     }

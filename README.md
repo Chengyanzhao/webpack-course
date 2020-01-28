@@ -278,49 +278,66 @@ source map类型，由上面几种关键字排列组合得到：
 
 ### 基础库分离
 
-思路：将vue、react、react-dom等基础包通过cdn引入，不打入bundle中。
+**思路1：**将vue、react、react-dom等基础包通过cdn引入，不打入bundle中。
 
-方法1：使用`html-webpack-externals-plugins`
+方法：使用`html-webpack-externals-plugin`
 
 配置:
 
 ``` js
-const HtmlWebpackExternalsPlugins = require('html-webpack-externals-plugins')
+// webpack.config.js
+const HtmlWebpackExternalsPlugin = require('html-webpack-externals-plugin')
 // ...
-plugins: [
-  new HtmlWebpackExternalsPlugins({
-    externals: [
-      {
-        module: 'react',
-        entry: 'https://cdn.bootcss.com/react/16.10.2/cjs/react.production.min.js',
-        global: 'React'
-      },
-      {
-        module: 'react-dom',
-        entry: 'xxx',
-        global: 'ReactDOM'
-      }
-    ]
-  })
-]
+module.exports = {
+  plugins: [
+    new HtmlWebpackExternalsPlugin({
+      externals: [
+        {
+          module: 'react',
+          entry: 'https://cdn.bootcss.com/react/16.10.2/cjs/react.production.min.js', // 本地文件或CDN文件。
+          global: 'React'
+        },
+        {
+          module: 'react-dom',
+          entry: 'dist/react-dom.js',
+          global: 'ReactDOM'
+        }
+      ]
+    })
+  ]
+}
 ```
 
-方法2：利用`SplitChunksPlugin`进行公共脚本分离
+**思路2：**将公共资源单独打包出来，让多页面去引用。
 
-`SplitChunksPlugin`在webpack4中内置，替代`CommonsChunkPlugin`插件
+方法：利用webpack4内置的`SplitChunksPlugin`进行公共脚本分离。在webpack3中通常使用`CommonsChunkPlugin`插件。另外需要注意，如果使用了多页面配置，需要修改相应引用的chunk。
 
 配置：
 
 ``` js
+// webpack.config.js
+
+// 多页面配置
+// ...
+new HtmlWebpackPlugin({
+  chunks: ['vendors', pageName]
+)}
+
 module.exports = {
   optimization: {
     splitChunks: {
+      chunks: 'async',
       cacheGroups: {
-        commons: {
+        commons: { // 分离基础库。
           test: /(react|react-dom)/, // 匹配规则，分离他们。
           name: 'vendors', // 分离出的名称
           chunks: 'all'
-        }
+        },
+        // commons:{ // 分离公共文件
+        //   name: 'commons',
+        //   chunks: 'all',
+        //   minChunks: 2 // 设置引用最小次数为2
+        // }
       }
     }
   }
@@ -331,6 +348,6 @@ chunks参数说明：
 
 - async: (默认)异步引入的库进行分离。比如es6中动态引入的库。
 - initial: 同步引入的库进行分离
-- all: 所有引入的库进行分离
+- all: 所有引入的库进行分离（推荐）
 
-[查看更多](https://webpack.js.org/plugins/split-chunks-plugin/#root)
+[详细配置信息](https://webpack.js.org/plugins/split-chunks-plugin/#root)

@@ -2,6 +2,7 @@
 
 import React from 'react'
 import ReactDOM from 'react-dom'
+import '../../common'
 import './index.less'
 import logo from '../images/logo.png'
 
